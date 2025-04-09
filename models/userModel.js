@@ -1,10 +1,9 @@
-const { types, required } = require('joi')
 const mongoose = require('mongoose')
 
 const userSchema = mongoose.Schema(
     {
         email:{
-            types: String,
+            type: String,
             required: [true, 'Email is required'],
             trim: true,
             unique: [true, 'Email must be unique'],
@@ -12,13 +11,35 @@ const userSchema = mongoose.Schema(
             lowercase: true,
         },
         password:{
-            types: String,
+            type: String,
             required: [true, 'Password must be provided'],
             trim: true,
             select: false,
         },
         verified:{
-            
-        }
+            type: Boolean,
+            default: false,
+        },
+        verificationCode:{
+            type: String,
+            select: false,
+        },
+        verificationCodeValidation:{
+            type: Number,
+            select: false,
+        },
+        forgotPasswordCode:{
+            type: String,
+            select: false,
+        },
+        forgotpasswordCodeValidation:{
+            type: Number,
+            select: false,
+        },
+    },
+    {
+        timesstamp: true
     }
 )
+
+module.exports = mongoose.model('User', userSchema);
