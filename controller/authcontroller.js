@@ -1,5 +1,6 @@
 const { signupSchema } = require("../middleware/validator");
 const { doHash } = require("../utils/hashing");
+const User = require('../models/userModel')
 
 exports.signup = async (req, res) => {
     const {email,password} = req.body;
@@ -12,7 +13,7 @@ exports.signup = async (req, res) => {
         const existingUser = await User.findOne({email});
 
         if(existingUser){
-            return res.status(4011).json({success:false, message: 'User already exist!'})
+            return res.status(401).json({success:false, message: 'User already exist!'})
         }
 
         const hashedPassword = await doHash(password, 12);
@@ -30,4 +31,14 @@ exports.signup = async (req, res) => {
         console.log(error);
     
     }
-} 
+};
+
+exports.signin async (req,res) => {
+    const {email,password} = req.body;
+    try {
+        
+    } catch (error) {
+        console.log(error);
+        
+    }
+}

@@ -10,5 +10,6 @@ exports.signupSchema = Joi.object({
     }),
     password: Joi.string()
     .required()
-    .pattern(new RegExp()),
+    .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$')),
 });
+
