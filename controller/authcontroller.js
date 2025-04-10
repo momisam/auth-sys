@@ -1,4 +1,5 @@
 const { signupSchema } = require("../middleware/validator");
+const { doHash } = require("../utils/hashing");
 
 exports.signup = async (req, res) => {
     const {email,password} = req.body;
@@ -14,9 +15,18 @@ exports.signup = async (req, res) => {
             return res.status(4011).json({success:false, message: 'User already exist!'})
         }
 
-        
+        const hashedPassword = await doHash(password, 12);
+
+        const newUser = new User({
+            email,
+            password:hashedPassword,
+        })
+        const result = await newUser.save();
+        result.password = undefined;
+        res.status(201).json({
+            success: true, message: 'Your account has been created successfully', result
+        })
     } catch (error) {
         console.log(error);
-    
-    }
+        }
 } 
