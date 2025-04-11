@@ -37,7 +37,7 @@ exports.signup = async (req, res) => {
 exports.signin = async (req,res) => {
     const {email,password} = req.body;
     try {
-        const {error,value} = signinSchema({email,password});
+        const {error,value} = signinSchema.validate({email,password});
         if(error){
             return res
             .status(401)
@@ -56,10 +56,12 @@ exports.signin = async (req,res) => {
             .json({sucess: false, message: 'Invalid credentials!'});
         }
         const token = jwt.sign({
-            userId: existingUse._id,
+            userId: existingUser._id,
             email: existingUser.email,
             verified: existingUser.verified,
-        }, )
+        }, process.env.TOKEN_SECRET
+    );
+    res.cookie('Authorization', 'Bearer' + token, { expires: new Date(Date.now() + 8 + 3600000), httpOnly: process.env.NODE_ENV === 'production', secure: process.env.NODE_ENV === 'production'}).json({ success: true, token, message: 'logged in successfully',})
 
     } catch (error) {
         console.log(error);
