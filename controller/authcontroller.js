@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken')
 const { signupSchema, signinSchema } = require("../middleware/validator");
 const { doHash, dohashValidation } = require("../utils/hashing");
-const User = require('../models/userModel')
+const User = require('../models/userModel');
+const transport = require('../middleware/sendMail');
 
 exports.signup = async (req, res) => {
     const {email,password} = req.body;
@@ -59,11 +60,46 @@ exports.signin = async (req,res) => {
             userId: existingUser._id,
             email: existingUser.email,
             verified: existingUser.verified,
-        }, process.env.TOKEN_SECRET
+        }, process.env.TOKEN_SECRET, {
+            expiresIn: '8h',
+        }
     );
     res.cookie('Authorization', 'Bearer' + token, { expires: new Date(Date.now() + 8 + 3600000), httpOnly: process.env.NODE_ENV === 'production', secure: process.env.NODE_ENV === 'production'}).json({ success: true, token, message: 'logged in successfully',})
 
     } catch (error) {
+        console.log(error);
+        
+    }
+};
+
+exports.signout = async (req,res) => {
+    res.clearCookie('Authorization')
+    .status(200)
+    .json({success: true, message: 'logged out successfully'});
+};
+
+exports.sendVerificationCode = async (req,res)=> {
+    const {email} = req.body;
+    try {
+        const existingUser = await User.findOne({email});
+        if(!existingUser){
+            return res
+            .status(404)
+            .json({success: false, message: 'User does not exist!'});
+    } 
+    if (existingUser.verified){
+        return res
+            .status(404)
+            .json({success: false, message: 'You are already verified'});
+    }
+    const codeValue = Math.floor(Math.random() * 1000000).toString();
+    let info = await transport({
+        from: process.env.NODE_CODE_SENDING_EMAIL_ADDRESS,
+        to: existingUser.email,
+        subject: 'verification code',
+        html:  '<h1>' + codeValue + '</h1>'
+    })
+}   catch (error) {
         console.log(error);
         
     }
